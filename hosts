@@ -1,0 +1,9 @@
+
+[slurm_master]
+frontend001 ansible_host=95.216.201.95 ansible_user=root cluster_name=hetzner multiuser_cluster=yes
+
+[slurm_worker]
+compute001 ansible_host=95.216.200.219 ansible_user=root multiuser_cluster=yes
+
+[aiida_host]
+aiida001 ansible_host=51.15.100.245 ansible_user=root

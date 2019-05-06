@@ -1,0 +1,44 @@
+---
+- name: Prepare VM for running Ansible
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Ensure Python is installed
+      script: |
+        install-py2.sh {{ ansible_python_interpreter|default("/usr/bin/python") }}
+      args:
+        creates: '{{ ansible_python_interpreter|default("/usr/bin/python") }}'
+      become: yes
+
+# for local customizations
+- import_playbook: before.yml
+
+- name: Common setup for all hosts
+  hosts: all
+  gather_facts: yes
+  pre_tasks:
+    - name: Ensure apt-daily is *not* running
+      script: |
+        no-update-on-reboot.sh
+      become: yes
+      when: 'is_debian_compatible'
+  roles:
+    - role: common
+    - role: iptables
+      # FIXME: should change to 'DROP' when all playbooks register their input ports!
+      default_input_policy: 'ACCEPT'
+    - role: ntpd
+      ntp_server: '{{groups.ntp_master|default([])}}'
+    - role: pdsh
+
+# Run all other playbooks one by one, so they get a chance of doing
+# their setup depending on configured host groups
+
+# filesystems/storage first so we could in principle use it in compute clusters
+- import_playbook: roles/nfs-server.yml
+
+# now install and set up computing infrastructure
+- import_playbook: roles/slurm.yml
+
+# for local customizations
+- import_playbook: after.yml
