@@ -26,7 +26,7 @@
     - role: common
     - role: iptables
       # FIXME: should change to 'DROP' when all playbooks register their input ports!
-      default_input_policy: 'ACCEPT'
+      default_input_policy: 'DROP'
     - role: ntpd
       ntp_server: '{{groups.ntp_master|default([])}}'
     - role: pdsh
