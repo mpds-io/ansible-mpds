@@ -10,15 +10,6 @@
 # into ElastiCluster's main branch.
 #  
 
-- name: Add user to cluster
-  hosts: slurm_master slurm_worker 
-  tasks:
-    - name: Add the user 'user'
-      user:
-        name: user
-        uid: 1040
-        comment: John Doe
-        shell: /bin/bash
 
 # - name: Apply customizations to master Slurm node
 #   hosts: slurm_master

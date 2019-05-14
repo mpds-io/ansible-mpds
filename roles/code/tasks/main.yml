@@ -1,33 +1,31 @@
 ---
 
+- name: Set authorized key to the computer
+  authorized_key:
+    user: user
+    key: '{{ item }}'
+    state: present
+  with_file:
+    - keys/id_rsa.pub
 
-  - name: Set authorized key, removing all the authorized keys already set
-    authorized_key:
-      user: user
-      key: '{{ item }}'
-      state: present
-      exclusive: True
-    with_file:
-      - keys/id_rsa.pub
+- name: Create ~/bin and ~/aiida directories
+  file:
+    path: '{{ item }}'
+    state: directory
+    owner: user
+    group: user
+    mode: 0775
+    recurse: yes
+  loop:
+    - /home/user/bin
+    - /home/user/aiida
 
-  - name: Create ~/bin and ~/aiida directories
-    file:
-      path: '{{ item }}'
-      state: directory
-      owner: user
-      group: user
-      mode: 0775
-      recurse: yes
-    loop:
-     - /home/user/bin
-     - /home/user/aiida
-
-  - name: Copying code files with owner and permissions
-    copy:
-      src: '{{ item }}'
-      dest: /home/user/bin/
-      owner: user
-      group: user
-      mode: 0755
-    with_fileglob:
-     - codes/*
+- name: Copying code files with owner and permissions
+  copy:
+    src: '{{ item }}'
+    dest: /home/user/bin/
+    owner: user
+    group: user
+    mode: 0755
+  with_fileglob:
+    - files/*

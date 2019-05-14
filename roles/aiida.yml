@@ -5,23 +5,21 @@
 
 - name: Aiida host playbook
   hosts: aiida_host
-  # tasks:
-  #   - name: Check if aiida is installed
-  #     shell: which verdi
-  #     register: is_aiida_installed
-  #     failed_when: is_aiida_installed.rc > 1
   roles: 
-    # - role: postgresql
-    #   postgresql_users:
-    #     - name: aiida
-    #       pass: 123456
-    #   postgresql_databases:
-    #     - name: aiidadb
-    #       owner: aiida
-    #   postgresql_user_privileges:
-    #     - name: aiida
-    #       db: aiidadb
-    #       priv: "ALL"
-    # - role: 'postgresql'
-    #   when: is_aiida_installed.rc == 1
     - aiida
+
+- name: Add user to cluster
+  hosts: slurm_master slurm_worker 
+  tasks:
+    - name: Add the user 'user'
+      user:
+        name: user
+        uid: 1040
+        comment: John Doe
+        shell: /bin/bash
+
+- name: Add code customizations to the cluster
+  hosts: slurm_master
+  roles: 
+    - code
+
