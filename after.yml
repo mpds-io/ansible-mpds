@@ -10,8 +10,11 @@
 # into ElastiCluster's main branch.
 #  
 
-
-# - name: Apply customizations to master Slurm node
-#   hosts: slurm_master
-#   roles:
-#     - role: code 
+- name: Apply local customizations (after)
+  tags:
+    - after
+    - local
+  hosts: all
+  # by default these are no-op (empty task list)
+  roles: []
+  tasks: []
