@@ -1,0 +1,35 @@
+---
+# 
+#  Install aiida to aiida_host
+#
+
+# - name: /DEBUG/ Prepare VM for running Ansible
+#   hosts: aiida_host
+#   gather_facts: no
+#   tasks:
+#     - name: Ensure Python is installed
+#       script: |
+#         install-py2.sh {{ ansible_python_interpreter|default("/usr/bin/python") }}
+#       args:
+#         creates: '{{ ansible_python_interpreter|default("/usr/bin/python") }}'
+#       become: yes
+
+ - name: /DEBUG/ Gather facts for all
+   hosts: all
+   tasks:
+    - setup:
+
+ - name: /DEBUG/ Allow package updates
+   hosts: aiida_host
+   tasks:
+    - name: Set varible
+      set_fact:
+        pkg_install_state: 'latest'
+
+
+# - name: /DEBUG/ Common setup for aiida host
+#   hosts: aiida_host
+#   roles:
+#     - common
+
+ - import_playbook: roles/aiida.yml

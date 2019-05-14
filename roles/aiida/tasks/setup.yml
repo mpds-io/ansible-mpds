@@ -1,0 +1,58 @@
+---
+#
+#  Setting up the computer to aiida
+#
+
+- name: Copy SSH private key
+  copy:
+    src: keys/id_rsa
+    dest: /root/.ssh/id_rsa.{{hostvars[groups['slurm_master'][0]]['cluster_name']}}
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Check the existence of {{hostvars[groups['slurm_master'][0]]['cluster_name']}} computer in Aiida
+  shell: verdi computer list | grep -q {{hostvars[groups['slurm_master'][0]]['cluster_name']}}
+  register: has_computer
+  failed_when: has_computer.rc > 1
+
+- name: Setup new computer for Aiida ({{hostvars[groups['slurm_master'][0]]['cluster_name']}})
+  command: |
+    verdi computer setup --non-interactive \
+    --label='{{hostvars[groups['slurm_master'][0]]['cluster_name']}}' \
+    --hostname='{{hostvars[groups['slurm_master'][0]].ansible_default_ipv4.address}}' \
+    --enabled \
+    --transport=ssh \
+    --scheduler=slurm \
+    --work-dir=/home/user/aiida
+  when: has_computer.rc == 1
+
+- name: Configure new computer for Aiida ({{hostvars[groups['slurm_master'][0]]['cluster_name']}})
+  command: |
+    verdi computer configure ssh --non-interactive \
+    --username=user \
+    --port=22 \
+    --key-filename=~/.ssh/id_rsa.{{hostvars[groups['slurm_master'][0]]['cluster_name']}} \
+    --key-policy=AutoAddPolicy \
+    '{{hostvars[groups['slurm_master'][0]]['cluster_name']}}'
+  when: has_computer.rc == 1
+
+- name: Check the existence of CRYSTAL codes on {{hostvars[groups['slurm_master'][0]]['cluster_name']}} computer in Aiida
+  shell: verdi code list | grep -q {{hostvars[groups['slurm_master'][0]]['cluster_name']}}
+  register: has_codes
+  failed_when: has_codes.rc > 1
+
+- name: Configure codes for {{hostvars[groups['slurm_master'][0]]['cluster_name']}} computer
+  command: |
+    verdi code setup --non-interactive \
+    --label={{ item.exec }} \
+    --description="{{item.exec}} on {{hostvars[groups['slurm_master'][0]]['cluster_name']}}" \
+    --input-plugin={{ item.plugin }} \
+    --on-computer \
+    --computer='{{hostvars[groups['slurm_master'][0]]['cluster_name']}}' \
+    --remote-abs-path=/home/user/{{ item.exec }}
+  with_items:
+    - { exec: 'crystal', plugin: 'crystal.serial'} 
+    - { exec: 'Pcrystal', plugin: 'crystal.parallel'} 
+    - { exec: 'properties', plugin: 'crystal.properties'} 
+  when: has_codes.rc == 1

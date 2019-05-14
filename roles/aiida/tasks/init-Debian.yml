@@ -1,0 +1,16 @@
+---
+#
+# Set variables for Debian/Ubuntu variants
+#
+
+- name: Set Aiida host variables (Debian/Ubuntu)
+  tags:
+    - aiida
+  set_fact:
+    aiida_packages:
+      - postgresql
+      - postgresql-client
+      - postgresql-contrib
+      - rabbitmq-server
+    postgresql_service_name: postgresql
+  when: is_debian_compatible

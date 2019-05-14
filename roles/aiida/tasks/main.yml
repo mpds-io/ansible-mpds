@@ -1,0 +1,127 @@
+---
+#
+#  Install and setup Aiida on Aiida host
+#
+
+- name: Load distribution-specific parameters
+  include_tasks: 'init-{{ansible_os_family}}.yml'
+  tags:
+    - aiida
+
+- name: Check if aiida is installed
+  tags:
+    - aiida
+  shell: which verdi
+  register: is_aiida_installed
+  failed_when: is_aiida_installed.rc > 1
+
+- name: Install packages needed for aiida
+  tags:
+    - aiida
+  package:
+    name: '{{aiida_packages}}'
+    state: '{{ pkg_install_state }}'
+  when: is_aiida_installed.rc == 1
+
+- name: Ensure PostgreSQL is running and enabled at boot
+  tags:
+    - aiida
+  service:
+    name: "{{postgresql_service_name}}"
+    enabled: yes
+    state: started
+  when: is_aiida_installed.rc == 1
+
+- name: Ensure RabbitMQ is running and enabled at boot
+  tags:
+    - aiida
+  service:
+    name: rabbitmq-server
+    enabled: yes
+    state: started
+  when: is_aiida_installed.rc == 1
+
+- name: Add aiidadb database to PostgreSQL
+  tags:   
+    - aiida
+  postgresql_db:
+    name: aiidadb
+  when: is_aiida_installed.rc == 1
+
+- name: Add aiida user to PostgreSQL and grant all privileges to aiidadb
+  tags:
+    - aiida
+  postgresql_user:
+    name: aiida
+    password: "{{ lookup('password', 'aiida/.dbpass length=15 chars=ascii_letters,digits') }}"
+    db: aiidadb
+    priv: "ALL"
+  when: is_aiida_installed.rc == 1
+
+- name: Install Python packages
+  tags:
+    - aiida
+  package:
+    name: 
+      - python3-dev
+      - python3-pip
+      - python3-setuptools
+      - python-setuptools
+    state: '{{ pkg_install_state }}'
+  when: is_aiida_installed.rc == 1
+
+- name: Downgrade pip to version 18.1
+  tags: 
+    - aiida
+  pip:
+    executable: pip3
+    name: 
+      - pip==18.1
+  when: is_aiida_installed.rc == 1
+
+- name: Install AiiDA
+  tags: 
+    - aiida
+  pip:
+    executable: pip3
+    name: 
+      - aiida-core==1.0.0a4
+  when: is_aiida_installed.rc == 1
+
+- name: Checkout aiida-crystal plugin
+  tags: 
+    - aiida
+  git:
+    repo: 'https://github.com/tilde-lab/aiida-crystal.git'
+    dest: ~/aiida-crystal
+  when: is_aiida_installed.rc == 1
+
+- name: Install aiida-crystal plugin
+  tags: 
+    - aiida
+  shell: pip3 install -e ~/aiida-crystal
+  when: is_aiida_installed.rc == 1
+
+- name: Add default profile to AiiDA
+  tags: 
+    - aiida
+  command: |
+    verdi setup --set-default --non-interactive \
+    --backend django \
+    --db-host localhost \
+    --db-port 5432 \
+    --db-name aiidadb \
+    --db-username aiida \
+    --db-password "{{ lookup('password', 'aiida/.dbpass length=15 chars=ascii_letters,digits') }}" \
+    --repository ~/.aiida/repository-default \
+    --email user@host.net \
+    --first-name Aiida \
+    --last-name User \
+    --institution MPDS \
+    default 
+  when: is_aiida_installed.rc == 1
+
+- name: Setup the computer in AiiDA
+  include_tasks: 'setup.yml'
+  tags:
+    - aiida

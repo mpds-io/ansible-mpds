@@ -10,7 +10,7 @@
     with_file:
       - keys/id_rsa.pub
 
-  - name: Create directories
+  - name: Create ~/bin and ~/aiida directories
     file:
       path: '{{ item }}'
       state: directory

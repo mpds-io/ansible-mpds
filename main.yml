@@ -39,6 +39,7 @@
 
 # now install and set up computing infrastructure
 - import_playbook: roles/slurm.yml
+- import_playbook: roles/aiida.yml
 
 # for local customizations
 - import_playbook: after.yml

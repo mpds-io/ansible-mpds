@@ -1,0 +1,27 @@
+---
+#
+#  Check if aiida is installed, if not, then install every package
+#
+
+- name: Aiida host playbook
+  hosts: aiida_host
+  # tasks:
+  #   - name: Check if aiida is installed
+  #     shell: which verdi
+  #     register: is_aiida_installed
+  #     failed_when: is_aiida_installed.rc > 1
+  roles: 
+    # - role: postgresql
+    #   postgresql_users:
+    #     - name: aiida
+    #       pass: 123456
+    #   postgresql_databases:
+    #     - name: aiidadb
+    #       owner: aiida
+    #   postgresql_user_privileges:
+    #     - name: aiida
+    #       db: aiidadb
+    #       priv: "ALL"
+    # - role: 'postgresql'
+    #   when: is_aiida_installed.rc == 1
+    - aiida
