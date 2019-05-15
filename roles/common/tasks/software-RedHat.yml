@@ -39,6 +39,7 @@
       - m4
       - rsync
       - screen
+      - sudo
       - tmux
       - vim
     state: '{{ pkg_install_state }}'
