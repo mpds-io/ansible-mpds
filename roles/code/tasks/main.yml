@@ -1,5 +1,9 @@
 ---
 
+- name: Add user 'user' to the slurm db
+  shell: |
+    sacctmgr --immediate --quiet add user user DefaultAccount=root
+
 - name: Set authorized key to the computer
   authorized_key:
     user: user
