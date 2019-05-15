@@ -1,3 +1,4 @@
 keys/*
 roles/aiida/.dbpass
 hosts
+*.retry

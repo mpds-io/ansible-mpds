@@ -10,20 +10,26 @@
 #     path: "{{playbook_dir}}"/keys/id_rsa.{{hostvars[groups['slurm_master'][0]]['cluster_name']}}
 #     type: rsa
 
+# - name: Generate SSH keys
+#   local_action:
+#     module: "user"
+#     name: "{{ lookup('env','USER') }}"
+#     generate_ssh_key: true
+#     ssh_key_type: rsa
+#     ssh_key_bits: 1024
+#     ssh_key_file: "{{ playbook_dir }}/../keys/id_rsa"
+
 - name: Generate SSH keys
-  local_action:
-    module: "user"
-    name: "{{ lookup('env','USER') }}"
-    generate_ssh_key: true
-    ssh_key_type: rsa
-    ssh_key_bits: 1024
-    ssh_key_file: "{{ playbook_dir }}/keys/id_rsa"
+  delegate_to: localhost
+  command : ssh-keygen -q -t rsa -m PEM -f "{{ playbook_dir }}/../keys/id_rsa" -C "" -N ""
+  args:
+    creates: "{{ playbook_dir }}/../keys/id_rsa"
 
 - name: Copy SSH private key
   tags:
     - aiida
   copy:
-    src: "{{playbook_dir}}/keys/id_rsa"
+    src: "{{playbook_dir}}/../keys/id_rsa"
     dest: /root/.ssh/id_rsa.{{hostvars[groups['slurm_master'][0]]['cluster_name']}}
     owner: root
     group: root

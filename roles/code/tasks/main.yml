@@ -6,7 +6,7 @@
     key: '{{ item }}'
     state: present
   with_file:
-    - keys/id_rsa.pub
+    - "{{playbook_dir}}/../keys/id_rsa.pub"
 
 - name: Create ~/bin and ~/aiida directories
   file:
