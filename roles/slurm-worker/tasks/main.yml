@@ -29,7 +29,8 @@
     name: '{{slurmd_packages}}'
     state: '{{ pkg_install_state }}'
 
-- name: Ensure SLURMd starts at boot
+- name: Ensure SLURMd starts now and at boot
   service:
     name: '{{slurmd_service}}'
+    state: started
     enabled: yes
