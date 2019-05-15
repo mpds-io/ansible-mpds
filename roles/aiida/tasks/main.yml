@@ -44,6 +44,8 @@
 - name: Add aiidadb database to PostgreSQL
   tags:   
     - aiida
+  become: yes
+  become_user: postgres
   postgresql_db:
     name: aiidadb
   when: is_aiida_installed.rc == 1
@@ -51,6 +53,8 @@
 - name: Add aiida user to PostgreSQL and grant all privileges to aiidadb
   tags:
     - aiida
+  become: yes
+  become_user: postgres
   postgresql_user:
     name: aiida
     password: "{{ lookup('password', 'aiida/.dbpass length=15 chars=ascii_letters,digits') }}"

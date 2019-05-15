@@ -12,5 +12,7 @@
       - postgresql-client
       - postgresql-contrib
       - rabbitmq-server
+      - python-psycopg2
+      - python3-psycopg2
     postgresql_service_name: postgresql
   when: is_debian_compatible
