@@ -74,7 +74,7 @@
     --input-plugin={{ item.plugin }} \
     --on-computer \
     --computer='{{hostvars[groups['slurm_master'][0]]['cluster_name']}}' \
-    --remote-abs-path=/home/user/{{ item.exec }}
+    --remote-abs-path=/home/user/bin/{{ item.exec }}
   with_items:
     - { exec: 'crystal', plugin: 'crystal.serial'} 
     - { exec: 'Pcrystal', plugin: 'crystal.parallel'} 
