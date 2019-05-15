@@ -89,7 +89,8 @@
   pip:
     executable: pip3
     name: 
-      - aiida-core==1.0.0a4
+      - aiida-core==1.0.0a4[rest]
+      - jsonextended
   when: is_aiida_installed.rc == 1
 
 - name: Checkout aiida-crystal plugin
