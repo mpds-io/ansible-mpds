@@ -89,7 +89,7 @@
   pip:
     executable: pip3
     name: 
-      - aiida-core==1.0.0a4[rest]
+      - aiida-core[rest]==1.0.0a4
       - jsonextended
   when: is_aiida_installed.rc == 1
 
