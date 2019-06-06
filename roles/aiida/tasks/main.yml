@@ -62,7 +62,7 @@
     priv: "ALL"
   when: is_aiida_installed.rc == 1
 
-- name: Install Python packages
+- name: Install system Python packages
   tags:
     - aiida
   package:
@@ -83,14 +83,31 @@
       - pip==18.1
   when: is_aiida_installed.rc == 1
 
-- name: Install AiiDA
+- name: Install prerequisite Python packages
   tags: 
     - aiida
   pip:
     executable: pip3
     name: 
-      - aiida-core[rest]==1.0.0a4
+      - kiwipy==0.3.10
+      - pika==1.0.0b1
+      - topika==0.1.3
       - jsonextended
+  when: is_aiida_installed.rc == 1
+
+- name: Checkout AiiDA
+  tags: 
+    - aiida
+  git:
+    repo: 'https://github.com/aiidateam/aiida_core.git'
+    version: fae3dfca1f7a3936d24d472a3481ab2a8841c106
+    dest: ~/aiida_core
+  when: is_aiida_installed.rc == 1
+
+- name: Install AiiDA
+  tags: 
+    - aiida
+  shell: pip3 install -e ~/aiida_core[rest]
   when: is_aiida_installed.rc == 1
 
 - name: Checkout aiida-crystal plugin
