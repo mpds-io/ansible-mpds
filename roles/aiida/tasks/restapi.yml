@@ -1,0 +1,53 @@
+---
+
+- name: Install packages needed for AiiDA restapi
+  package:
+    name: 
+     - nginx
+     - supervisor
+     - python-passlib
+    state: '{{ pkg_install_state }}'
+
+- name: Install python passlib needed for AiiDA restapi
+  pip:
+    executable: pip3
+    name: 
+      - passlib
+
+- name: Install config files for RestAPI services
+  copy:
+    src: '{{ item }}' 
+    dest: '/{{ item }}'
+    mode: '0644'
+  loop:
+    - 'etc/nginx/nginx.conf'
+    - 'etc/supervisor/supervisord.conf'
+
+- name: Install nginx .htpasswd file
+  htpasswd:
+    path: '/etc/nginx/.htpasswd'
+    name: "{{hostvars[groups['aiida_host'][0]]['api_user']}}"
+    password: "{{hostvars[groups['aiida_host'][0]]['api_pass']}}"
+    owner: root
+    group: www-data
+    mode: 0640
+
+- name: Ensure RestAPI services are started
+  service:
+    name: '{{item}}'
+    enabled: yes
+    state: started
+  loop:
+    - 'nginx'
+    - 'supervisor' 
+
+- name: Open port for RestAPI
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: 18080
+    jump: ACCEPT
+
+# - name: Start AiiDA RestAPI
+#   command: |
+#     verdi restapi

@@ -147,3 +147,9 @@
   include_tasks: 'setup.yml'
   tags:
     - aiida
+
+- name: Setup AiiDA RestAPI
+  include_tasks: 'restapi.yml'
+  tags:
+    - aiida
+
