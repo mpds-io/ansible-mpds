@@ -9,12 +9,6 @@
      - python-openssl
     state: '{{ pkg_install_state }}'
 
-- name: Install python passlib needed for AiiDA restapi
-  pip:
-    executable: pip3
-    name: 
-      - passlib
-
 - name: Install config files for RestAPI services (supervisor)
   copy:
     src: 'etc/supervisor/supervisord.conf' 
@@ -65,7 +59,7 @@
   service:
     name: '{{item}}'
     enabled: yes
-    state: started
+    state: restarted
   loop:
     - 'supervisor'
     - 'nginx' 
