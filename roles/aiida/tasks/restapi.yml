@@ -6,6 +6,7 @@
      - nginx
      - supervisor
      - python-passlib
+     - python-openssl
     state: '{{ pkg_install_state }}'
 
 - name: Install python passlib needed for AiiDA restapi
@@ -14,14 +15,42 @@
     name: 
       - passlib
 
-- name: Install config files for RestAPI services
+- name: Install config files for RestAPI services (supervisor)
   copy:
-    src: '{{ item }}' 
-    dest: '/{{ item }}'
+    src: 'etc/supervisor/supervisord.conf' 
+    dest: '/etc/supervisor/supervisord.conf'
     mode: '0644'
-  loop:
-    - 'etc/nginx/nginx.conf'
-    - 'etc/supervisor/supervisord.conf'
+
+- name: Install config files for RestAPI services (nginx)
+  template:
+    src: 'etc/nginx/nginx.conf.j2' 
+    dest: '/etc/nginx/nginx.conf'
+    mode: '0644'
+
+- name: Generate an OpenSSL private key
+  openssl_privatekey:
+    path: /etc/nginx/localhost.key
+  when: 'need_ssl'
+
+- name: Generate a certificate signing request
+  openssl_csr:
+    path: /etc/nginx/localhost.csr
+    privatekey_path: /etc/nginx/localhost.key
+    common_name: '{{ip}}'
+    subject_alt_name: 'IP:{{ip}}'
+    key_usage:
+     - digitalSignature
+    extended_key_usage:
+     - serverAuth
+  when: 'need_ssl'
+
+- name: Generate a self-signed certificate
+  openssl_certificate:
+    path: /etc/nginx/localhost.crt
+    privatekey_path: /etc/nginx/localhost.key
+    csr_path: /etc/nginx/localhost.csr
+    provider: selfsigned
+  when: 'need_ssl'
 
 - name: Install nginx .htpasswd file
   htpasswd:
@@ -38,8 +67,8 @@
     enabled: yes
     state: started
   loop:
-    - 'nginx'
-    - 'supervisor' 
+    - 'supervisor'
+    - 'nginx' 
 
 - name: Open port for RestAPI
   iptables:

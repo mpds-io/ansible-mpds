@@ -8,6 +8,7 @@
     - aiida
   set_fact:
     aiida_packages:
+      - gcc
       - postgresql
       - postgresql-client
       - postgresql-contrib
@@ -15,4 +16,6 @@
       - python-psycopg2
       - python3-psycopg2
     postgresql_service_name: postgresql
+    need_ssl: ssl|default("false")|bool
+    ip: '{{ansible_default_ipv4.address}}'
   when: is_debian_compatible
